@@ -33,6 +33,15 @@ cd image-generation-service
 pip install fastapi uvicorn[standard] python-multipart Pillow python-jose passlib python-dotenv bitsandbytes transformers diffusers accelerate 
 
 ```
+
+Also, pytorch dependencies, if using CPU inference:
+
+```bash
+pip install torch torchvision
+```
+
+CPU based inference setup should be completed.
+
 If using CUDA, also install:
 ```bash
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu130
