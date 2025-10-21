@@ -1,0 +1,4 @@
+{
+    "model_load_retentation_strategy": "reload",
+    "use_cpu_offloading": true
+}

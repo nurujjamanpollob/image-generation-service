@@ -1,0 +1,29 @@
+# CUDA-Optimized Requirements for NVIDIA GPUs
+# This file is optimized for systems with NVIDIA CUDA-enabled GPUs
+
+--extra-index-url https://download.pytorch.org/whl/cu130
+
+# Core dependencies (Latest stable versions)
+fastapi==0.119.0
+uvicorn==0.37.0
+diffusers==0.35.2
+transformers==4.57.1
+Pillow==12.0.0
+python-multipart==0.0.20
+
+# PyTorch with CUDA support (Optimized for NVIDIA GPUs)
+# The --extra-index-url at the top of the file directs pip to the PyTorch wheel repository for CUDA 13.0.
+torch==2.3.1
+torchvision==0.18.1
+torchaudio==2.3.1
+
+# CUDA-specific optimizations for CUDA 13.x
+# Note: These packages provide the CUDA runtime and libraries for PyTorch.
+# Versions are updated for compatibility with CUDA 13.x.
+nvidia-cuda-runtime-cu13==13.0.120
+nvidia-cuda-cupti-cu13==13.0.120
+nvidia-cuda-nvrtc-cu13==13.0.120
+nvidia-cuda-driver-cu13==13.0.120
+
+# Optional: Additional CUDA performance libraries
+nvidia-ml-py==13.580.82

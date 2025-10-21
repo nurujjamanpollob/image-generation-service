@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - Image Generation Service</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#1e40af',
+                        accent: '#60a5fa'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-image text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold text-gray-800">ImageGen API</h1>
+            </div>
+            <nav class="hidden md:flex space-x-6">
+                <a href="/" class="text-gray-600 hover:text-primary font-medium">Home</a>
+                <a href="/documentation" class="text-primary font-medium">Documentation</a>
+                <a href="/admin" class="text-gray-600 hover:text-primary font-medium">Admin Panel</a>
+            </nav>
+            <div>
+                <a href="/admin" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition duration-300">
+                    Admin Login
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Documentation Section -->
+    <section class="py-12">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">API Documentation</h1>
+            <p class="text-gray-600 mb-8">Comprehensive guide to using the Image Generation API</p>
+
+            <!-- API Endpoints -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">API Endpoints</h2>
+                
+                <!-- Text-to-Image -->
+                <div class="mb-8 pb-6 border-b border-gray-200">
+                    <h3 class="text-xl font-medium text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-comment-dots mr-2 text-primary"></i>
+                        Text-to-Image Generation
+                    </h3>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <code class="text-sm">POST /v1/generate/text-to-image</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Generate images from text prompts using AI models.</p>
+                    
+                    <h4 class="font-medium text-gray-800 mb-2">Request Headers:</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <code>X-API-KEY: your_secret_api_key</code>
+                    </div>
+                    
+                    <h4 class="font-medium text-gray-800 mb-2">Request Body (JSON):</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4 overflow-x-auto">
+                        <pre class="text-sm"><code>{
+  "prompt": "A cinematic shot of a raccoon astronaut, adrift in space, looking at Earth",
+  "num_images": 1,
+  "negative_prompt": "blurry, low quality, cartoon",
+  "guidance_scale": 7.5
+}</code></pre>
+                    </div>
+                    
+                    <h4 class="font-medium text-gray-800 mb-2">Response:</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg overflow-x-auto">
+                        <pre class="text-sm"><code>{
+  "status": "success",
+  "image_urls": [
+    "http://localhost:8000/downloads/123456789.png?api_key=your_api_key"
+  ],
+  "generated_at": "2023-01-01T00:00:00Z"
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Image-to-Image -->
+                <div class="mb-8 pb-6 border-b border-gray-200">
+                    <h3 class="text-xl font-medium text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-image mr-2 text-primary"></i>
+                        Image-to-Image Generation
+                    </h3>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <code class="text-sm">POST /v1/generate/image-to-image</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Modify existing images using text prompts.</p>
+                    
+                    <h4 class="font-medium text-gray-800 mb-2">Request Headers:</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <code>X-API-KEY: your_secret_api_key</code>
+                    </div>
+                    
+                    <h4 class="font-medium text-gray-800 mb-2">Request Body (multipart/form-data):</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
+                            <li><code>reference_image</code>: The image file to be modified</li>
+                            <li><code>prompt</code>: A text string describing the desired modifications</li>
+                            <li><code>num_images</code> (optional): Number of variations to generate</li>
+                            <li><code>strength</code> (optional): How much to transform the original image (0-1)</li>
+                        </ul>
+                    </div>
+                    
+                    <h4 class="font-medium text-gray-800 mb-2">Response:</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg overflow-x-auto">
+                        <pre class="text-sm"><code>{
+  "status": "success",
+  "image_urls": [
+    "http://localhost:8000/downloads/123456789.png?api_key=your_api_key"
+  ],
+  "generated_at": "2023-01-01T00:00:00Z"
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Image Upscaling -->
+                <div class="mb-8 pb-6 border-b border-gray-200">
+                    <h3 class="text-xl font-medium text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-expand-arrows-alt mr-2 text-primary"></i>
+                        Image Upscaling
+                    </h3>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <code class="text-sm">POST /v1/upscale/image</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Enhance image resolution while preserving quality.</p>
+                    
+                    <h4 class="font-medium text-gray-800 mb-2">Request Headers:</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <code>X-API-KEY: your_secret_api_key</code>
+                    </div>
+                    
+                    <h4 class="font-medium text-gray-800 mb-2">Request Body (multipart/form-data):</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
+                            <li><code>image_to_upscale</code>: The low-resolution image file</li>
+                            <li><code>prompt(optional)</code>: Prompt to upscale the image.</li>
+                        </ul>
+                    </div>
+                    
+                    <h4 class="font-medium text-gray-800 mb-2">Response:</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg overflow-x-auto">
+                        <pre class="text-sm"><code>{
+  "status": "success",
+  "image_url": "http://localhost:8000/downloads/123456789.png?api_key=your_api_key",
+  "original_resolution": "512x512",
+  "new_resolution": "1024x1024",
+  "generated_at": "2023-01-01T00:00:00Z"
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Secure Download -->
+                <div class="mb-8 pb-6 border-b border-gray-200">
+                    <h3 class="text-xl font-medium text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-download mr-2 text-primary"></i>
+                        Secure Image Download
+                    </h3>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <code class="text-sm">GET /downloads/{filename}?api_key={api_key}</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Download generated images with embedded API keys for secure access.</p>
+                </div>
+            </div>
+
+            <!-- Admin Endpoints -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Admin Endpoints</h2>
+                
+                <p class="text-gray-600 mb-4">These endpoints require the ADMIN_API_KEY to be set in environment variables.</p>
+                
+                <!-- Create API Key -->
+                <div class="mb-8 pb-6 border-b border-gray-200">
+                    <h3 class="text-xl font-medium text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-key mr-2 text-primary"></i>
+                        Create New API Key
+                    </h3>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <code class="text-sm">POST /admin/keys</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Generate a new API key for users to access the service.</p>
+                    
+                    <h4 class="font-medium text-gray-800 mb-2">Request Headers:</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <code>X-API-KEY: your_admin_api_key</code>
+                    </div>
+                    
+                    <h4 class="font-medium text-gray-800 mb-2">Response:</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg overflow-x-auto">
+                        <pre class="text-sm"><code>{
+  "message": "API key created successfully",
+  "api_key": "generated_api_key_here"
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Revoke API Key -->
+                <div class="mb-8 pb-6 border-b border-gray-200">
+                    <h3 class="text-xl font-medium text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-trash-alt mr-2 text-primary"></i>
+                        Revoke API Key
+                    </h3>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <code class="text-sm">DELETE /admin/keys/{api_key}</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Revoke (delete) an existing API key.</p>
+                    
+                    <h4 class="font-medium text-gray-800 mb-2">Request Headers:</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <code>X-API-KEY: your_admin_api_key</code>
+                    </div>
+                    
+                    <h4 class="font-medium text-gray-800 mb-2">Response:</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg overflow-x-auto">
+                        <pre class="text-sm"><code>{
+  "message": "API key revoked successfully"
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- List API Keys -->
+                <div>
+                    <h3 class="text-xl font-medium text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-list mr-2 text-primary"></i>
+                        List API Keys
+                    </h3>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <code class="text-sm">GET /admin/keys</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">List all active API keys.</p>
+                    
+                    <h4 class="font-medium text-gray-800 mb-2">Request Headers:</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <code>X-API-KEY: your_admin_api_key</code>
+                    </div>
+                    
+                    <h4 class="font-medium text-gray-800 mb-2">Response:</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg overflow-x-auto">
+                        <pre class="text-sm"><code>{
+  "api_keys": [
+    "key1",
+    "key2",
+    "key3"
+  ]
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">ImageGen API</h3>
+                    <p class="text-gray-400">Advanced AI-powered image generation service for developers and creators.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/" class="hover:text-white transition">Home</a></li>
+                        <li><a href="/documentation" class="hover:text-white transition">Documentation</a></li>
+                        <li><a href="/admin" class="hover:text-white transition">Admin Panel</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">API Endpoints</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>Text-to-Image</li>
+                        <li>Image-to-Image</li>
+                        <li>Image Upscaling</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>Powered by Eaze Web IT</p>
+                <p>&copy; 2025 Eaze Web IT, All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

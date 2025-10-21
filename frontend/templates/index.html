@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Generation Service</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        #loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3b82f6;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-image text-blue-500 text-2xl"></i>
+                <h1 class="text-xl font-bold text-gray-800">ImageGen API</h1>
+            </div>
+            <nav class="hidden md:flex space-x-6">
+                <a href="/" class="text-gray-600 hover:text-blue-500 font-medium">Home</a>
+                <a href="/documentation" class="text-gray-600 hover:text-blue-500 font-medium">Documentation</a>
+                <a href="/admin" class="text-gray-600 hover:text-blue-500 font-medium">Admin Panel</a>
+            </nav>
+            <div>
+                <a href="/admin" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+                    Admin Login
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="py-16 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">AI-Powered Image Generation</h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+                Transform your ideas into stunning visuals with our powerful image generation API.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="/documentation" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 font-medium">
+                    View Documentation
+                </a>
+                <a href="/admin" class="border-2 border-blue-500 text-blue-500 px-6 py-3 rounded-lg hover:bg-blue-500 hover:text-white transition duration-300 font-medium">
+                    Admin Panel
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Powerful Image Generation Features</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition duration-300">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-comment-dots text-blue-500 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Text-to-Image</h3>
+                    <p class="text-gray-600">Generate stunning images from detailed text descriptions with our advanced AI models.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition duration-300">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-image text-blue-500 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Image-to-Image</h3>
+                    <p class="text-gray-600">Modify existing images with text prompts to create variations and enhancements.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition duration-300">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-expand-arrows-alt text-blue-500 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Image Upscaling</h3>
+                    <p class="text-gray-600">Enhance image resolution while preserving quality and details.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Test Section -->
+    <section class="py-16 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Test the API</h2>
+            <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6">
+                <!-- API Key Input -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2" for="apiKey">API Key:</label>
+                    <input type="text" id="apiKey" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your API key">
+                </div>
+
+                <!-- Tabs -->
+                <div class="border-b border-gray-200 mb-6">
+                    <nav class="-mb-px flex space-x-4" aria-label="Tabs">
+                        <button id="tab-t2i" class="tab-btn whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm text-gray-500 hover:text-blue-500 hover:border-blue-300 tab-active">
+                            Text-to-Image
+                        </button>
+                        <button id="tab-i2i" class="tab-btn whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm text-gray-500 hover:text-blue-500 hover:border-blue-300">
+                            Image-to-Image
+                        </button>
+                        <button id="tab-upscale" class="tab-btn whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm text-gray-500 hover:text-blue-500 hover:border-blue-300">
+                            Image Upscaling
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="tab-content-t2i" class="tab-content">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2" for="prompt-t2i">Prompt:</label>
+                        <input type="text" id="prompt-t2i" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="A cinematic shot of a raccoon astronaut...">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2">Number of images:</label>
+                        <select id="numImages-t2i" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="tab-content-i2i" class="tab-content hidden">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2" for="prompt-i2i">Prompt:</label>
+                        <input type="text" id="prompt-i2i" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Make the raccoon wear a party hat">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2" for="image-i2i">Reference Image:</label>
+                        <input type="file" id="image-i2i" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    </div>
+                </div>
+
+                <div id="tab-content-upscale" class="tab-content hidden">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2" for="image-upscale">Image to Upscale:</label>
+                        <input type="file" id="image-upscale" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    </div>
+                </div>
+
+                <button id="generateBtn" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300 font-medium">
+                    Generate
+                </button>
+
+                <div id="resultContainer" class="mt-6 hidden">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Result:</h3>
+                    <div id="loaderContainer" class="flex justify-center items-center py-8 hidden"><div id="loader"></div></div>
+                    <div id="errorContainer" class="hidden p-4 bg-red-100 text-red-700 border border-red-200 rounded-lg"></div>
+                    <div id="imagesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4 text-center text-gray-400">
+            <p>Powered by Eaze Web IT</p>
+            <p>&copy; 2025 Eaze Web IT, All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const tabs = {
+            t2i: document.getElementById('tab-t2i'),
+            i2i: document.getElementById('tab-i2i'),
+            upscale: document.getElementById('tab-upscale'),
+        };
+        const tabContents = {
+            t2i: document.getElementById('tab-content-t2i'),
+            i2i: document.getElementById('tab-content-i2i'),
+            upscale: document.getElementById('tab-content-upscale'),
+        };
+        const generateBtn = document.getElementById('generateBtn');
+        let activeTab = 't2i';
+
+        Object.keys(tabs).forEach(key => {
+            tabs[key].addEventListener('click', () => {
+                // Update active tab
+                activeTab = key;
+                generateBtn.textContent = key === 'upscale' ? 'Upscale' : 'Generate';
+
+                // Toggle button styles
+                Object.values(tabs).forEach(btn => btn.classList.remove('tab-active'));
+                tabs[key].classList.add('tab-active');
+
+                // Toggle content visibility
+                Object.values(tabContents).forEach(content => content.classList.add('hidden'));
+                tabContents[key].classList.remove('hidden');
+            });
+        });
+
+        generateBtn.addEventListener('click', async () => {
+            const apiKey = document.getElementById('apiKey').value;
+            if (!apiKey.trim()) {
+                alert('Please enter your API key.');
+                return;
+            }
+
+            const resultContainer = document.getElementById('resultContainer');
+            const imagesContainer = document.getElementById('imagesContainer');
+            const loaderContainer = document.getElementById('loaderContainer');
+            const errorContainer = document.getElementById('errorContainer');
+
+            resultContainer.classList.remove('hidden');
+            imagesContainer.innerHTML = '';
+            errorContainer.classList.add('hidden');
+            loaderContainer.classList.remove('hidden');
+            generateBtn.disabled = true;
+
+            try {
+                let response;
+                if (activeTab === 't2i') {
+                    const prompt = document.getElementById('prompt-t2i').value;
+                    const num_images = parseInt(document.getElementById('numImages-t2i').value);
+                    response = await fetch('/v1/generate/text-to-image', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+                        body: JSON.stringify({ prompt, num_images, model: "default" }),
+                    });
+                } else if (activeTab === 'i2i') {
+                    const formData = new FormData();
+                    formData.append('prompt', document.getElementById('prompt-i2i').value);
+                    formData.append('reference_image', document.getElementById('image-i2i').files[0]);
+                    response = await fetch('/v1/generate/image-to-image', {
+                        method: 'POST',
+                        headers: { 'X-API-Key': apiKey },
+                        body: formData,
+                    });
+                } else if (activeTab === 'upscale') {
+                    const formData = new FormData();
+                    formData.append('image_to_upscale', document.getElementById('image-upscale').files[0]);
+                    response = await fetch('/v1/upscale/image', {
+                        method: 'POST',
+                        headers: { 'X-API-Key': apiKey },
+                        body: formData,
+                    });
+                }
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'An unknown error occurred.');
+                }
+
+                const urls = data.image_urls || (data.image_url ? [data.image_url] : []);
+                urls.forEach(url => {
+                    const imgDiv = document.createElement('div');
+                    imgDiv.className = 'border rounded-lg overflow-hidden shadow-sm';
+                    imgDiv.innerHTML = `<img src="${url}" alt="Generated Image" class="w-full h-auto object-cover">`;
+                    imagesContainer.appendChild(imgDiv);
+                });
+
+            } catch (error) {
+                errorContainer.textContent = 'Error: ' + error.message;
+                errorContainer.classList.remove('hidden');
+            } finally {
+                loaderContainer.classList.add('hidden');
+                generateBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

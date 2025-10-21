@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Test - Image Generation Service</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#1e40af',
+                        accent: '#60a5fa'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-image text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold text-gray-800">ImageGen API</h1>
+            </div>
+            <nav class="hidden md:flex space-x-6">
+                <a href="/" class="text-gray-600 hover:text-primary font-medium">Home</a>
+                <a href="/documentation" class="text-gray-600 hover:text-primary font-medium">Documentation</a>
+                <a href="/admin" class="text-gray-600 hover:text-primary font-medium">Admin Panel</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Test Page Content -->
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Client API Testing</h1>
+        <p class="text-gray-600 mb-8">Test the image generation and upscaling APIs directly from your browser</p>
+
+        <!-- API Key Input -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-key mr-2 text-primary"></i>
+                Enter Your API Key
+            </h2>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <input 
+                    type="password" 
+                    id="apiKeyInput" 
+                    class="flex-grow px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Enter your API key"
+                >
+                <button id="saveApiKeyBtn" class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-secondary transition duration-300 font-medium">
+                    Save Key
+                </button>
+            </div>
+            <p class="text-sm text-gray-500 mt-2">Your API key will be stored locally for this session.</p>
+        </div>
+
+        <!-- Text-to-Image Test -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-comment-dots mr-2 text-primary"></i>
+                Text-to-Image Generation
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2" for="textPrompt">Prompt</label>
+                        <input 
+                            type="text" 
+                            id="textPrompt" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="A cinematic shot of a raccoon astronaut, adrift in space, looking at Earth"
+                        >
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2" for="numImages">Number of Images</label>
+                        <select id="numImages" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2" for="negativePrompt">Negative Prompt</label>
+                        <input 
+                            type="text" 
+                            id="negativePrompt" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="blurry, low quality, cartoon"
+                        >
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2" for="guidanceScale">Guidance Scale</label>
+                        <input 
+                            type="number" 
+                            id="guidanceScale" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                            value="7.5" 
+                            min="1" 
+                            max="20"
+                        >
+                    </div>
+                </div>
+                
+                <div>
+                    <button id="generateTextBtn" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-secondary transition duration-300 font-medium mb-4">
+                        Generate Images
+                    </button>
+                    
+                    <div id="textResultContainer" class="hidden">
+                        <h3 class="font-medium text-gray-800 mb-2">Generated Images:</h3>
+                        <div id="textImagesContainer" class="grid grid-cols-1 gap-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image-to-Image Test -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-image mr-2 text-primary"></i>
+                Image-to-Image Modification
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2" for="imagePrompt">Prompt</label>
+                        <input 
+                            type="text" 
+                            id="imagePrompt" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="Add a space suit to the raccoon astronaut"
+                        >
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2" for="imageStrength">Modification Strength</label>
+                        <input 
+                            type="range" 
+                            id="imageStrength" 
+                            class="w-full"
+                            min="0.1" 
+                            max="1.0" 
+                            step="0.1" 
+                            value="0.8"
+                        >
+                        <div class="text-sm text-gray-500">Strength: <span id="strengthValue">0.8</span></div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2" for="referenceImage">Reference Image</label>
+                        <input 
+                            type="file" 
+                            id="referenceImage" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                            accept="image/*"
+                        >
+                    </div>
+                </div>
+                
+                <div>
+                    <button id="generateImageBtn" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-secondary transition duration-300 font-medium mb-4">
+                        Generate Modified Image
+                    </button>
+                    
+                    <div id="imageResultContainer" class="hidden">
+                        <h3 class="font-medium text-gray-800 mb-2">Modified Image:</h3>
+                        <div id="imageResultBox" class="border rounded-lg p-4 text-center">
+                            <!-- Modified image will appear here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Upscaling Test -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-expand-arrows-alt mr-2 text-primary"></i>
+                Image Upscaling
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2" for="upscalingImage">Low Resolution Image</label>
+                        <input 
+                            type="file" 
+                            id="upscalingImage" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                            accept="image/*"
+                        >
+                    </div>
+                </div>
+                
+                <div>
+                    <button id="upscaleBtn" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-secondary transition duration-300 font-medium mb-4">
+                        Upscale Image
+                    </button>
+                    
+                    <div id="upscaleResultContainer" class="hidden">
+                        <h3 class="font-medium text-gray-800 mb-2">Upscaled Image:</h3>
+                        <div id="upscaleResultBox" class="border rounded-lg p-4 text-center">
+                            <!-- Upscaled image will appear here -->
+                        </div>
+                        <div id="resolutionInfo" class="mt-2 text-sm text-gray-600"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">ImageGen API</h3>
+                    <p class="text-gray-400">Advanced AI-powered image generation service for developers and creators.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/" class="hover:text-white transition">Home</a></li>
+                        <li><a href="/documentation" class="hover:text-white transition">Documentation</a></li>
+                        <li><a href="/admin" class="hover:text-white transition">Admin Panel</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">API Endpoints</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>Text-to-Image</li>
+                        <li>Image-to-Image</li>
+                        <li>Image Upscaling</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>Powered by Eaze Web IT</p>
+                <p>&copy; 2025 Eaze Web IT, All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Update strength value display
+        document.getElementById('imageStrength').addEventListener('input', function() {
+            document.getElementById('strengthValue').textContent = this.value;
+        });
+
+        // Save API key to localStorage
+        document.getElementById('saveApiKeyBtn').addEventListener('click', function() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            if (apiKey) {
+                localStorage.setItem('userApiKey', apiKey);
+                showSuccess('API Key saved successfully!');
+            } else {
+                showError('Please enter a valid API key');
+            }
+        });
+
+        // Generate text-to-image
+        document.getElementById('generateTextBtn').addEventListener('click', async function() {
+            const apiKey = localStorage.getItem('userApiKey');
+            if (!apiKey) {
+                showError('Please enter and save your API key first');
+                return;
+            }
+
+            const prompt = document.getElementById('textPrompt').value.trim();
+            const numImages = document.getElementById('numImages').value;
+            const negativePrompt = document.getElementById('negativePrompt').value.trim();
+            const guidanceScale = parseFloat(document.getElementById('guidanceScale').value);
+
+            if (!prompt) {
+                showError('Please enter a prompt');
+                return;
+            }
+
+            try {
+                // Show loading state
+                const generateBtn = document.getElementById('generateTextBtn');
+                const originalText = generateBtn.textContent;
+                generateBtn.textContent = 'Generating...';
+                generateBtn.disabled = true;
+
+                const response = await fetch('/v1/generate/text-to-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-KEY': apiKey
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        num_images: parseInt(numImages),
+                        negative_prompt: negativePrompt || null,
+                        guidance_scale: guidanceScale
+                    })
+                });
+
+                generateBtn.textContent = originalText;
+                generateBtn.disabled = false;
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showTextResult(data.image_urls);
+                } else {
+                    const error = await response.json();
+                    showError(error.detail || 'Failed to generate images');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        });
+
+        // Generate image-to-image
+        document.getElementById('generateImageBtn').addEventListener('click', async function() {
+            const apiKey = localStorage.getItem('userApiKey');
+            if (!apiKey) {
+                showError('Please enter and save your API key first');
+                return;
+            }
+
+            const prompt = document.getElementById('imagePrompt').value.trim();
+            const strength = parseFloat(document.getElementById('imageStrength').value);
+            const fileInput = document.getElementById('referenceImage');
+
+            if (!prompt || !fileInput.files.length) {
+                showError('Please enter a prompt and select an image');
+                return;
+            }
+
+            try {
+                // Show loading state
+                const generateBtn = document.getElementById('generateImageBtn');
+                const originalText = generateBtn.textContent;
+                generateBtn.textContent = 'Generating...';
+                generateBtn.disabled = true;
+
+                const formData = new FormData();
+                formData.append('prompt', prompt);
+                formData.append('reference_image', fileInput.files[0]);
+                formData.append('num_images', 1);
+                formData.append('strength', strength);
+
+                const response = await fetch('/v1/generate/image-to-image', {
+                    method: 'POST',
+                    headers: {
+                        'X-API-KEY': apiKey
+                    },
+                    body: formData
+                });
+
+                generateBtn.textContent = originalText;
+                generateBtn.disabled = false;
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showImageResult(data.image_urls[0]);
+                } else {
+                    const error = await response.json();
+                    showError(error.detail || 'Failed to modify image');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        });
+
+        // Upscale image
+        document.getElementById('upscaleBtn').addEventListener('click', async function() {
+            const apiKey = localStorage.getItem('userApiKey');
+            if (!apiKey) {
+                showError('Please enter and save your API key first');
+                return;
+            }
+
+            const fileInput = document.getElementById('upscalingImage');
+
+            if (!fileInput.files.length) {
+                showError('Please select an image to upscale');
+                return;
+            }
+
+            try {
+                // Show loading state
+                const upscaleBtn = document.getElementById('upscaleBtn');
+                const originalText = upscaleBtn.textContent;
+                upscaleBtn.textContent = 'Upscaling...';
+                upscaleBtn.disabled = true;
+
+                const formData = new FormData();
+                formData.append('image_to_upscale', fileInput.files[0]);
+
+                const response = await fetch('/v1/upscale/image', {
+                    method: 'POST',
+                    headers: {
+                        'X-API-KEY': apiKey
+                    },
+                    body: formData
+                });
+
+                upscaleBtn.textContent = originalText;
+                upscaleBtn.disabled = false;
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showUpscaleResult(data.image_url, data.original_resolution, data.new_resolution);
+                } else {
+                    const error = await response.json();
+                    showError(error.detail || 'Failed to upscale image');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        });
+
+        // Show text generation result
+        function showTextResult(imageUrls) {
+            const container = document.getElementById('textResultContainer');
+            const imagesContainer = document.getElementById('textImagesContainer');
+            
+            imagesContainer.innerHTML = '';
+            
+            imageUrls.forEach(url => {
+                const imageElement = document.createElement('div');
+                imageElement.className = 'border rounded-lg overflow-hidden';
+                imageElement.innerHTML = `
+                    <img src="${url}" alt="Generated Image" class="w-full h-auto object-cover">
+                    <div class="p-3 bg-gray-50">
+                        <p class="text-sm text-gray-600 truncate">Generated image from prompt</p>
+                    </div>
+                `;
+                imagesContainer.appendChild(imageElement);
+            });
+            
+            container.classList.remove('hidden');
+        }
+
+        // Show image modification result
+        function showImageResult(imageUrl) {
+            const container = document.getElementById('imageResultContainer');
+            const resultBox = document.getElementById('imageResultBox');
+            
+            resultBox.innerHTML = `
+                <img src="${imageUrl}" alt="Modified Image" class="w-full h-auto object-cover rounded-lg">
+            `;
+            
+            container.classList.remove('hidden');
+        }
+
+        // Show upscale result
+        function showUpscaleResult(imageUrl, originalRes, newRes) {
+            const container = document.getElementById('upscaleResultContainer');
+            const resultBox = document.getElementById('upscaleResultBox');
+            const resolutionInfo = document.getElementById('resolutionInfo');
+            
+            resultBox.innerHTML = `
+                <img src="${imageUrl}" alt="Upscaled Image" class="w-full h-auto object-cover rounded-lg">
+            `;
+            
+            resolutionInfo.innerHTML = `
+                <p>Original Resolution: ${originalRes}</p>
+                <p>New Resolution: ${newRes}</p>
+            `;
+            
+            container.classList.remove('hidden');
+        }
+
+        // Show success message (inline)
+        function showSuccess(message) {
+            // Create or update success notification
+            let successElement = document.getElementById('successMessage');
+            if (!successElement) {
+                successElement = document.createElement('div');
+                successElement.id = 'successMessage';
+                successElement.className = 'fixed top-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50';
+                document.body.appendChild(successElement);
+            }
+            successElement.textContent = message;
+            successElement.classList.remove('hidden');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                successElement.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Show error message (inline)
+        function showError(message) {
+            // Create or update error notification
+            let errorElement = document.getElementById('errorMessage');
+            if (!errorElement) {
+                errorElement = document.createElement('div');
+                errorElement.id = 'errorMessage';
+                errorElement.className = 'fixed top-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg z-50';
+                document.body.appendChild(errorElement);
+            }
+            errorElement.textContent = message;
+            errorElement.classList.remove('hidden');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                errorElement.classList.add('hidden');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

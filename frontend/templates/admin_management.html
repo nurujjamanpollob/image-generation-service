@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Management - Image Generation Service</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#1e40af',
+                        accent: '#60a5fa',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-image text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold text-gray-800">ImageGen API</h1>
+            </div>
+            <nav class="hidden md:flex space-x-6">
+                <a href="/" class="text-gray-600 hover:text-primary font-medium">Home</a>
+                <a href="/documentation" class="text-gray-600 hover:text-primary font-medium">Documentation</a>
+                <a href="/admin" class="text-primary font-medium">Admin Panel</a>
+            </nav>
+            <div>
+                <button id="logoutBtn" class="bg-danger text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-300">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">API Key Management</h1>
+            <button id="refreshBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition duration-300">
+                <i class="fas fa-sync-alt mr-2"></i>Refresh
+            </button>
+        </div>
+
+        <!-- Add API Key Section -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-plus-circle mr-2 text-primary"></i>
+                Create New API Key
+            </h2>
+            <p class="text-gray-600 mb-4">Generate a new API key for users to access the service.</p>
+            
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button id="createKeyBtn" class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-secondary transition duration-300 font-medium">
+                    Generate New API Key
+                </button>
+                <div id="newKeyDisplay" class="hidden bg-gray-50 p-4 rounded-lg flex-grow">
+                    <p class="text-sm text-gray-600 mb-2">New API Key:</p>
+                    <div class="flex items-center">
+                        <code id="generatedKey" class="bg-white p-2 rounded font-mono text-sm break-all"></code>
+                        <button id="copyKeyBtn" class="ml-2 bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-cog mr-2 text-primary"></i>
+                Application Settings
+            </h2>
+            
+            <!-- Use CPU Offloading Setting -->
+            <div class="mb-6 p-4 border border-gray-200 rounded-lg">
+                <h3 class="text-lg font-medium text-gray-800 mb-2">Use CPU Offloading</h3>
+                <p class="text-gray-600 mb-4">This will be helpful with GPU which has less VRAM, to offload some model layers to the system memory.</p>
+                
+                <div class="flex items-center space-x-4">
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="useCpuOffloading" class="sr-only peer">
+                        <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                        <span class="ml-3 text-sm font-medium text-gray-700">Enable CPU Offloading</span>
+                    </label>
+                </div>
+                
+                <button id="saveCpuOffloadingBtn" class="mt-4 bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition duration-300">
+                    Save Setting
+                </button>
+            </div>
+            
+            <!-- Model Load Retention Strategy Setting -->
+            <div class="p-4 border border-gray-200 rounded-lg">
+                <h3 class="text-lg font-medium text-gray-800 mb-2">Model Load Retention Strategy</h3>
+                <p class="text-gray-600 mb-4">Loaded memory would be kept in the memory for faster response and avoid loading model every time a new request is made, recommended for production environment. Reload should refresh and suitable with GPU with limited VRAM, by allowing multiple model functions to work, and it clears loaded model from memory when a task is cleared, not suitable for large scale inference.</p>
+                
+                <div class="space-y-4">
+                    <label class="inline-flex items-center">
+                        <input type="radio" id="keepStrategy" name="modelStrategy" value="keep" class="text-primary focus:ring-primary">
+                        <span class="ml-2">Keep (Recommended for Production)</span>
+                    </label>
+                    <br>
+                    <label class="inline-flex items-center">
+                        <input type="radio" id="reloadStrategy" name="modelStrategy" value="reload" class="text-primary focus:ring-primary">
+                        <span class="ml-2">Reload (For Limited VRAM)</span>
+                    </label>
+                </div>
+                
+                <button id="saveModelStrategyBtn" class="mt-4 bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition duration-300">
+                    Save Setting
+                </button>
+            </div>
+        </div>
+
+        <!-- API Keys List -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-key mr-2 text-primary"></i>
+                Active API Keys
+            </h2>
+            
+            <div id="loadingKeys" class="text-center py-8">
+                <i class="fas fa-spinner fa-spin text-gray-400 text-xl mb-2"></i>
+                <p class="text-gray-600">Loading API keys...</p>
+            </div>
+            
+            <div id="keysContainer" class="hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">API Key</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="keysTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- API keys will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="noKeysMessage" class="hidden text-center py-8 text-gray-500">
+                <i class="fas fa-key text-4xl mb-4"></i>
+                <p>No API keys found. Create your first key to get started.</p>
+            </div>
+        </div>
+
+        <!-- Validate API Key Section -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-check-circle mr-2 text-primary"></i>
+                Validate API Key
+            </h2>
+            <p class="text-gray-600 mb-4">Check if an API key is valid and active.</p>
+            
+            <div class="flex flex-col sm:flex-row gap-4">
+                <input 
+                    type="text" 
+                    id="validateKeyInput" 
+                    class="flex-grow px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Enter API key to validate"
+                >
+                <button id="validateKeyBtn" class="bg-success text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 font-medium">
+                    Validate Key
+                </button>
+            </div>
+            
+            <div id="validationResult" class="mt-4 p-4 rounded-lg hidden">
+                <!-- Validation results will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">ImageGen API</h3>
+                    <p class="text-gray-400">Advanced AI-powered image generation service for developers and creators.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/" class="hover:text-white transition">Home</a></li>
+                        <li><a href="/documentation" class="hover:text-white transition">Documentation</a></li>
+                        <li><a href="/admin" class="hover:text-white transition">Admin Panel</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">API Endpoints</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>Text-to-Image</li>
+                        <li>Image-to-Image</li>
+                        <li>Image Upscaling</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>Powered by Eaze Web IT</p>
+                <p>&copy; 2025 Eaze Web IT, All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Check if user is logged in and validate session
+        document.addEventListener('DOMContentLoaded', function() {
+            const adminSession = localStorage.getItem('adminSession');
+            const adminApiKey = localStorage.getItem('adminApiKey');
+            
+            // If no session or invalid session, redirect to login page
+            if (!adminSession || adminSession !== 'active' || !adminApiKey) {
+                window.location.href = '/admin';
+                return;
+            }
+            
+            // Validate the session with server
+            validateAdminSession();
+        });
+
+        async function validateAdminSession() {
+            try {
+                const response = await fetch('/admin/validate-key', {
+                    method: 'GET',
+                    headers: {
+                        'X-API-KEY': localStorage.getItem('adminApiKey') || ''
+                    }
+                });
+                
+                if (!response.ok) {
+                    // Invalid session, redirect to login
+                    localStorage.removeItem('adminSession');
+                    localStorage.removeItem('adminApiKey');
+                    window.location.href = '/admin';
+                    return;
+                }
+                
+                loadApiKeys();
+                loadSettings();
+            } catch (error) {
+                // Network error, assume invalid session
+                localStorage.removeItem('adminSession');
+                localStorage.removeItem('adminApiKey');
+                window.location.href = '/admin';
+            }
+        }
+
+        // Load settings from the server
+        async function loadSettings() {
+            try {
+                const response = await fetch('/admin/settings', {
+                    method: 'GET',
+                    headers: {
+                        'X-API-KEY': localStorage.getItem('adminApiKey') || ''
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateUIWithSettings(data);
+                } else {
+                    console.error('Failed to load settings');
+                }
+            } catch (error) {
+                console.error('Network error loading settings:', error);
+            }
+        }
+
+        // Update UI with loaded settings
+        function updateUIWithSettings(settings) {
+            if (settings.use_cpu_offloading !== undefined) {
+                const cpuOffloadingCheckbox = document.getElementById('useCpuOffloading');
+                cpuOffloadingCheckbox.checked = settings.use_cpu_offloading === true;
+            }
+            
+            if (settings.model_load_retentation_strategy) {
+                const strategy = settings.model_load_retentation_strategy;
+                if (strategy === 'keep') {
+                    document.getElementById('keepStrategy').checked = true;
+                } else if (strategy === 'reload') {
+                    document.getElementById('reloadStrategy').checked = true;
+                }
+            }
+        }
+
+        // Save CPU offloading setting
+        async function saveCpuOffloading() {
+            const checkbox = document.getElementById('useCpuOffloading');
+            const value = checkbox.checked;
+            
+            try {
+                const response = await fetch('/admin/settings/use_cpu_offloading', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-KEY': localStorage.getItem('adminApiKey') || ''
+                    },
+                    body: JSON.stringify({ value: value })
+                });
+                
+                if (response.ok) {
+                    showSuccess('CPU offloading setting saved successfully!');
+                } else {
+                    const error = await response.json();
+                    showError(error.detail || 'Failed to save CPU offloading setting');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        }
+
+        // Save model load retention strategy setting
+        async function saveModelStrategy() {
+            const selectedStrategy = document.querySelector('input[name="modelStrategy"]:checked');
+            
+            if (!selectedStrategy) {
+                showError('Please select a strategy');
+                return;
+            }
+            
+            const value = selectedStrategy.value;
+            
+            try {
+                const response = await fetch('/admin/settings/model_load_retentation_strategy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-KEY': localStorage.getItem('adminApiKey') || ''
+                    },
+                    body: JSON.stringify({ value: value })
+                });
+                
+                if (response.ok) {
+                    showSuccess('Model load strategy setting saved successfully!');
+                } else {
+                    const error = await response.json();
+                    showError(error.detail || 'Failed to save model load strategy setting');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('adminSession');
+            localStorage.removeItem('adminApiKey');
+            window.location.href = '/admin';
+        }
+
+        // Create a new API key
+        async function createApiKey() {
+            try {
+                const response = await fetch('/admin/keys', {
+                    method: 'POST',
+                    headers: {
+                        'X-API-KEY': localStorage.getItem('adminApiKey') || ''
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showSuccess('API key created successfully!');
+                    document.getElementById('newKeyDisplay').classList.remove('hidden');
+                    document.getElementById('generatedKey').textContent = data.api_key;
+                    
+                    // Refresh the list
+                    loadApiKeys();
+                } else {
+                    const error = await response.json();
+                    showError(error.detail || 'Failed to create API key');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        }
+
+        // Load all API keys
+        async function loadApiKeys() {
+            try {
+                const response = await fetch('/admin/keys', {
+                    method: 'GET',
+                    headers: {
+                        'X-API-KEY': localStorage.getItem('adminApiKey') || ''
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    displayApiKeys(data.api_keys);
+                } else {
+                    const error = await response.json();
+                    showError(error.detail || 'Failed to load API keys');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        }
+
+        // Display API keys in the table
+        function displayApiKeys(keys) {
+            const tableBody = document.getElementById('keysTableBody');
+            const loadingElement = document.getElementById('loadingKeys');
+            const containerElement = document.getElementById('keysContainer');
+            const noKeysMessage = document.getElementById('noKeysMessage');
+            
+            if (keys.length === 0) {
+                loadingElement.classList.add('hidden');
+                containerElement.classList.add('hidden');
+                noKeysMessage.classList.remove('hidden');
+                return;
+            }
+            
+            tableBody.innerHTML = '';
+            
+            keys.forEach(key => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <code class="font-mono text-sm break-all">${key.substring(0, 12)}...</code>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button onclick="revokeKey('${key}')" class="text-danger hover:text-red-700 mr-3">
+                            <i class="fas fa-trash"></i> Revoke
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            loadingElement.classList.add('hidden');
+            containerElement.classList.remove('hidden');
+            noKeysMessage.classList.add('hidden');
+        }
+
+        // Revoke an API key
+        async function revokeKey(key) {
+            if (!confirm(`Are you sure you want to revoke the API key: ${key.substring(0, 12)}...?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/admin/keys/${encodeURIComponent(key)}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-API-KEY': localStorage.getItem('adminApiKey') || ''
+                    }
+                });
+                
+                if (response.ok) {
+                    showSuccess('API key revoked successfully!');
+                    await loadApiKeys(); // Refresh the list
+                } else {
+                    const error = await response.json();
+                    showError(error.detail || 'Failed to revoke API key');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        }
+
+        // Validate an API key
+        async function validateApiKey() {
+            const keyToValidate = document.getElementById('validateKeyInput').value.trim();
+            const resultElement = document.getElementById('validationResult');
+            
+            if (!keyToValidate) {
+                showError('Please enter an API key to validate');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/admin/validate-key', {
+                    method: 'GET',
+                    headers: {
+                        'X-API-KEY': keyToValidate
+                    }
+                });
+                
+                if (response.ok) {
+                    showValidationResult('Valid API Key', true);
+                } else {
+                    const error = await response.json();
+                    showValidationResult(error.detail || 'Invalid API Key', false);
+                }
+            } catch (error) {
+                showValidationResult('Error validating key: ' + error.message, false);
+            }
+        }
+
+        // Show validation result
+        function showValidationResult(message, isValid) {
+            const resultElement = document.getElementById('validationResult');
+            resultElement.className = 'mt-4 p-4 rounded-lg ' + (isValid ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700');
+            resultElement.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${isValid ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+                    ${message}
+                </div>
+            `;
+            resultElement.classList.remove('hidden');
+        }
+
+        // Copy key to clipboard
+        function copyKeyToClipboard() {
+            const key = document.getElementById('generatedKey').textContent;
+            navigator.clipboard.writeText(key)
+                .then(() => {
+                    showSuccess('API key copied to clipboard!');
+                })
+                .catch(err => {
+                    showError('Failed to copy: ' + err);
+                });
+        }
+
+        // Show success message (inline)
+        function showSuccess(message) {
+            // Create or update success notification
+            let successElement = document.getElementById('successMessage');
+            if (!successElement) {
+                successElement = document.createElement('div');
+                successElement.id = 'successMessage';
+                successElement.className = 'fixed top-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50';
+                document.body.appendChild(successElement);
+            }
+            successElement.textContent = message;
+            successElement.classList.remove('hidden');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                successElement.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Show error message (inline)
+        function showError(message) {
+            // Create or update error notification
+            let errorElement = document.getElementById('errorMessage');
+            if (!errorElement) {
+                errorElement = document.createElement('div');
+                errorElement.id = 'errorMessage';
+                errorElement.className = 'fixed top-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg z-50';
+                document.body.appendChild(errorElement);
+            }
+            errorElement.textContent = message;
+            errorElement.classList.remove('hidden');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                errorElement.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Setup event listeners
+        document.getElementById('createKeyBtn').addEventListener('click', createApiKey);
+        document.getElementById('refreshBtn').addEventListener('click', loadApiKeys);
+        document.getElementById('validateKeyBtn').addEventListener('click', validateApiKey);
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+        document.getElementById('copyKeyBtn').addEventListener('click', copyKeyToClipboard);
+        document.getElementById('saveCpuOffloadingBtn').addEventListener('click', saveCpuOffloading);
+        document.getElementById('saveModelStrategyBtn').addEventListener('click', saveModelStrategy);
+    </script>
+</body>
+</html>
