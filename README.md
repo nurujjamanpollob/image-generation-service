@@ -18,6 +18,7 @@ A secure FastAPI-based backend service for generating images using Hugging Face 
 
 - Python 3.8 or higher
 - CUDA-compatible GPU (recommended) or CPU
+- Hugging Face account with access to desired models (if using private models)
 
 ### Installation
 
@@ -45,6 +46,7 @@ This code tested in a RTX 5090 environment with CUDA 13.0 and Windows 11.
 
 3. Set environment variables:
 ```bash
+export HUGGINGFACE_HUB_TOKEN=your_huggingface_token_here
 export MODEL_ID="stabilityai/stable-diffusion-3.5-large"  # or your preferred model
 export ADMIN_API_KEY="your-admin-key-here"       # Generate a secure admin key
 ```
@@ -204,3 +206,6 @@ Headers: X-API-KEY: your_admin_api_key
 - Image-to-image modification
 - Image upscaling
 - API key management in the browser
+
+## Credit
+Developed by autonomous code generation tool called Eaze Editor, which is a powerful AI code generation tool. Visit [eaze web it website](https://eazewebit.com) for more information.
